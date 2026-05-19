@@ -1,0 +1,24 @@
+{
+  "name": "daily-necessity-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx prisma generate && npx prisma db push && nodemon src/index.js",
+    "start": "node src/index.js",
+    "migrate": "npx prisma migrate dev",
+    "seed": "node prisma/seed.js",
+    "lint": "echo 'lint placeholder'"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.1.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prisma": "^6.1.0"
+  }
+}
