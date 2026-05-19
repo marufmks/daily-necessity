@@ -33,21 +33,38 @@ docker compose up --build   # builds all images, starts services
 **Dev script:** `npx prisma generate && npx prisma db push && nodemon src/index.js` — auto-syncs schema via `db push` (no migration files required for dev).
 **Prisma schema:** `backend/prisma/schema.prisma` — models: User, RefreshToken, Category, Product, Inventory, CartItem, Address, Order, OrderItem, Payment. All IDs are UUIDs. Enums: UserRole (CUSTOMER/ADMIN), OrderStatus.
 
-Folder convention (as-built or planned):
-- `src/controllers`, `src/services`, `src/routes`, `src/middlewares` — HTTP layer, business logic, route defs, middleware
-- `src/config` — env parsing and config loading
-- `prisma/` — schema, migrations, seed
+Folder convention (as-built):
+- `src/features/auth`, `categories`, `products`, `inventory`, `cart`, `addresses`, `orders`, `users`, `payments` — each has `routes.js`, `controller.js`, `service.js`, `validation.js`
+- `src/config`, `src/lib`, `src/middlewares`, `src/routes`, `src/utils` — shared infrastructure
+- `prisma/` — schema, seed
 
 Dockerfile is multi-stage: `development` (installs all deps, runs dev script) and `production` (production-only deps, prisma generate, node start).
 
+**Seed credentials:**
+- Admin: `admin@daily-necessity.com` / `admin123`
+- Customer: `customer@example.com` / `customer123`
+
 ## Frontend
 
-**Entrypoint:** `frontend/src/main.jsx` → `App.jsx`.
-Uses Vite 6 with `@vitejs/plugin-react`. Server config: `host: true` + polling watch for Docker compat.
+**Entrypoint:** `frontend/src/main.jsx` → `App.jsx` (router + providers).
+Uses Vite 6 with `@vitejs/plugin-react` and `@tailwindcss/vite`. Server config: `host: true` + polling watch for Docker compat.
 API base: `import.meta.env.VITE_API_URL` (defaults to `http://localhost:3000/api`).
 
-Folder convention (planned):
-- `src/components`, `src/pages`, `src/features`, `src/api`, `src/hooks`, `src/context`, `src/utils`, `src/assets`
+| Directory | Purpose |
+|-----------|---------|
+| `src/api/` | Fetch client + endpoint functions |
+| `src/components/ui/` | shadcn/ui primitives (Button, Card, Input, Select, Badge, etc.) |
+| `src/components/layout/` | Navbar, Footer, Layout wrapper |
+| `src/context/` | AuthContext (login/logout/register), CartContext (add/remove/quantity) |
+| `src/pages/` | All route pages (Home, Products, Cart, Checkout, Login, Register, etc.) |
+| `src/pages/admin/` | Admin pages (Dashboard, ProductsManage, OrdersManage, UsersManage) |
+| `src/styles/globals.css` | Tailwind v4 + shadcn CSS variables |
+
+`import` aliases use `@/` mapped to `src/`.
+Auth is token-based: `localStorage.getItem("token")` → `Authorization: Bearer` header.
+shadcn components are hand-coded (not CLI-generated) for Docker compatibility.
+- 10 UI primitives: Button, Card, Input, Label, Badge, Separator, Select, Sheet, DropdownMenu, RadioGroup, Skeleton.
+- Toast via `sonner`.
 
 Dockerfile is multi-stage: `development` (Vite dev server) and `production` (nginx serving built dist).
 
@@ -59,6 +76,7 @@ Dockerfile is multi-stage: `development` (Vite dev server) and `production` (ngi
 | backend  | `npm run dev`                    | Dev server with Prisma + nodemon     |
 | backend  | `npm run migrate`                | `prisma migrate dev` (requires DB)   |
 | backend  | `npm run seed`                   | Run `prisma/seed.js`                 |
+| backend  | `npm start`                      | Production start                     |
 | frontend | `npm run dev`                    | Vite dev server                      |
 | frontend | `npm run build`                  | Production build to `dist/`          |
 
