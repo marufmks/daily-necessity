@@ -48,7 +48,7 @@ export function CartProvider({ children }) {
   const clearCart = useCallback(() => setItems([]), []);
 
   const subtotal = items.reduce(
-    (sum, item) => sum + Number(item.product.price) * item.quantity,
+    (sum, item) => sum + (Number(item.product?.price) || 0) * item.quantity,
     0,
   );
 

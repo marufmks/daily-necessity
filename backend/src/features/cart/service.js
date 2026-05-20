@@ -29,15 +29,21 @@ async function add(userId, { productId, quantity }) {
     where: { userId_productId: { userId, productId } },
   });
 
+  const include = {
+    product: { select: { id: true, name: true, slug: true, price: true, imageUrl: true, unit: true, inventory: { select: { quantity: true } } } },
+  };
+
   if (existing) {
     return prisma.cartItem.update({
       where: { id: existing.id },
       data: { quantity: existing.quantity + quantity },
+      include,
     });
   }
 
   return prisma.cartItem.create({
     data: { userId, productId, quantity },
+    include,
   });
 }
 
@@ -45,9 +51,14 @@ async function updateQuantity(userId, itemId, { quantity }) {
   const item = await prisma.cartItem.findUnique({ where: { id: itemId } });
   if (!item || item.userId !== userId) throw new ApiError(404, "Cart item not found");
 
+  const include = {
+    product: { select: { id: true, name: true, slug: true, price: true, imageUrl: true, unit: true, inventory: { select: { quantity: true } } } },
+  };
+
   return prisma.cartItem.update({
     where: { id: itemId },
     data: { quantity },
+    include,
   });
 }
 
